@@ -7,12 +7,22 @@ type User{
     createdAt:String!
     token:String
 }
+type Message{
+    uuid:String!
+    content:String!
+    from:String!
+    to:String!
+    createdAt:String!
+}
 type Query{
     getUsers:[User]!
     login(
         username:String!
         password:String!
     ):User!
+    getMessage(
+        from:String!
+    ):[Message]!
 }
 type Mutation{
     register(
@@ -21,5 +31,9 @@ type Mutation{
         password:String!
         confirmPassword:String!
     ):User!
+    sendMessage(
+        to:String!
+        content:String!
+    ):Message!
 }
 `;

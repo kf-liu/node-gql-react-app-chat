@@ -2,25 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { UserInputError, AuthenticationError } = require('apollo-server');
 const { Op } = require('sequelize');
-const { JWT_SECRET } = require('../config/env.json');
+const { JWT_SECRET } = require('../../config/env.json');
 
-const { User } = require('../models');
+const { User } = require('../../models');
 
 module.exports = {
     Query: {
-        getUsers: async (_, __, context) => {
-            let user;
+        getUsers: async (_, __, { user }) => {
+            if (!user) throw new AuthenticationError('Unauthenticated');
 
-            if (context.req?.headers?.authorization) {
-                const token = context.req.headers.authorization.split('Bearer ')[1];
-                jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
-                    if (err) {
-                        throw new AuthenticationError('Unauthenticated');
-                    }
-                    user = decodedToken;
-                    console.log(user);
-                });
-            }
             try {
                 const users = await User.findAll({
                     where: { username: { [Op.ne]: user.username } }
@@ -64,7 +54,7 @@ module.exports = {
                 console.log(err);
                 throw err;
             }
-        }
+        },
     },
     Mutation: {
         register: async (_parent, args, _context, _info) => {
@@ -112,6 +102,6 @@ module.exports = {
                 }
                 throw new UserInputError('Bad Input', { errors });
             }
-        }
-    }
+        },
+    },
 };
